@@ -1,0 +1,267 @@
+/* GTM-OS dashboard.
+ *
+ * The visual hierarchy encodes one fact about the product: a LinkedIn action is
+ * the scarce resource. So the count of actions spent is the loudest number on
+ * every surface, "served from cache" gets its own colour rather than a footnote,
+ * and everything else recedes. Dark because this is a console someone leaves
+ * open next to a terminal, not a page they visit.
+ */
+
+:root {
+  --bg:            #0a0c0f;
+  --panel:         #12151a;
+  --panel-2:       #171b21;
+  --line:          #23282f;
+  --line-soft:     #1a1e24;
+
+  --text:          #e6e9ee;
+  --text-2:        #9aa4b2;
+  --text-3:        #626c7a;
+
+  --live:          #58a6ff;   /* running, attached */
+  --ok:            #3fb950;   /* succeeded, online */
+  --free:          #2dd4a7;   /* cache hit: cost zero LinkedIn actions */
+  --warn:          #d9a441;   /* waiting on the user's machine */
+  --bad:           #f2665a;   /* failed */
+  --idle:          #5a636e;   /* queued, skipped, offline */
+
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+
+  --r: 6px;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; }
+
+/* ------------------------------------------------------------------ shell -- */
+
+.shell { display: grid; grid-template-columns: 208px 1fr; min-height: 100%; }
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+}
+
+.brand {
+  padding: 18px 18px 16px;
+  display: flex; align-items: baseline; gap: 8px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.brand b { font: 600 14px/1 var(--mono); letter-spacing: .04em; }
+.brand span { font-size: 10px; color: var(--text-3); letter-spacing: .08em; text-transform: uppercase; }
+
+.nav { padding: 10px 8px; display: flex; flex-direction: column; gap: 1px; }
+.nav a {
+  padding: 7px 10px; border-radius: var(--r); color: var(--text-2);
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+}
+.nav a:hover { background: var(--panel-2); color: var(--text); }
+.nav a.active { background: var(--panel-2); color: var(--text); box-shadow: inset 2px 0 0 var(--live); }
+.nav .count { font: 11px var(--mono); color: var(--text-3); }
+
+.sidebar-foot {
+  margin-top: auto; padding: 12px 14px;
+  border-top: 1px solid var(--line-soft); font-size: 11px; color: var(--text-3);
+}
+
+.main { min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 22px; height: 52px;
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; background: rgba(10,12,15,.85);
+  backdrop-filter: blur(8px); z-index: 5;
+}
+.topbar h1 { margin: 0; font-size: 14px; font-weight: 600; }
+.topbar .spacer { flex: 1; }
+
+.page { padding: 22px; max-width: 1180px; width: 100%; }
+
+/* ----------------------------------------------------------------- budget -- */
+
+/* The daily ceiling, always visible. Everything downstream is governed by it. */
+.budget { display: flex; align-items: center; gap: 9px; font: 11px var(--mono); color: var(--text-2); }
+.budget .bar { width: 88px; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.budget .bar i { display: block; height: 100%; background: var(--live); }
+.budget .bar i.hot { background: var(--warn); }
+.budget .bar i.full { background: var(--bad); }
+
+/* ------------------------------------------------------------------ panel -- */
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+.panel + .panel { margin-top: 16px; }
+.panel-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-bottom: 1px solid var(--line-soft);
+}
+.panel-head h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+.panel-head .sub { font-size: 11px; color: var(--text-3); }
+.panel-head .spacer { flex: 1; }
+.panel-body { padding: 16px; }
+
+.grid { display: grid; gap: 12px; }
+.grid.c3 { grid-template-columns: repeat(3, 1fr); }
+.grid.c4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) {
+  .grid.c3, .grid.c4 { grid-template-columns: repeat(2, 1fr); }
+  .shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+}
+
+/* ------------------------------------------------------------------ stats -- */
+
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+.stat .k { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .07em; }
+.stat .v { font: 500 24px/1.2 var(--mono); margin-top: 8px; }
+.stat .v small { font-size: 13px; color: var(--text-3); }
+.stat .note { font-size: 11px; color: var(--text-2); margin-top: 5px; }
+.stat.accent-free .v { color: var(--free); }
+.stat.accent-live .v { color: var(--live); }
+.stat.accent-warn .v { color: var(--warn); }
+
+/* ------------------------------------------------------------------ table -- */
+
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; font-size: 10px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text-3);
+  padding: 9px 16px; border-bottom: 1px solid var(--line-soft);
+}
+td { padding: 11px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr.clickable:hover { background: var(--panel-2); cursor: pointer; }
+td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--mono); }
+.muted { color: var(--text-3); }
+.dim { color: var(--text-2); }
+.truncate { max-width: 380px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ------------------------------------------------------------------- pill -- */
+
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 7px; border-radius: 4px;
+  font: 11px var(--mono); letter-spacing: .01em;
+  border: 1px solid transparent; white-space: nowrap;
+}
+.pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.pill.ok   { color: var(--ok);   background: color-mix(in srgb, var(--ok) 11%, transparent); }
+.pill.live { color: var(--live); background: color-mix(in srgb, var(--live) 12%, transparent); }
+.pill.free { color: var(--free); background: color-mix(in srgb, var(--free) 12%, transparent); }
+.pill.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); }
+.pill.bad  { color: var(--bad);  background: color-mix(in srgb, var(--bad) 12%, transparent); }
+.pill.idle { color: var(--idle); background: color-mix(in srgb, var(--idle) 14%, transparent); }
+
+.pill.live .dot { animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .25 } }
+@media (prefers-reduced-motion: reduce) { .pill.live .dot { animation: none } }
+
+/* ------------------------------------------------------------------ trace -- */
+
+/* One row per node, in execution order, with the LinkedIn cost on the right.
+ * The rail makes the sequence readable at a glance; the cost column is what
+ * anyone actually opens this screen to check. */
+.trace { position: relative; padding-left: 8px; }
+.trace-step { display: grid; grid-template-columns: 22px 1fr auto; gap: 14px; padding: 0 0 2px; }
+.trace-rail { position: relative; display: flex; justify-content: center; }
+.trace-rail::before {
+  content: ""; position: absolute; top: 20px; bottom: -2px; width: 1px; background: var(--line);
+}
+.trace-step:last-child .trace-rail::before { display: none; }
+.trace-node {
+  width: 9px; height: 9px; border-radius: 50%; margin-top: 7px;
+  background: var(--idle); box-shadow: 0 0 0 3px var(--panel);
+}
+.trace-node.ok { background: var(--ok); }
+.trace-node.free { background: var(--free); }
+.trace-node.live { background: var(--live); animation: pulse 1.4s ease-in-out infinite; }
+.trace-node.bad { background: var(--bad); }
+.trace-body { padding: 3px 0 16px; min-width: 0; }
+.trace-title { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.trace-title b { font: 500 13px var(--mono); }
+.trace-out {
+  margin-top: 7px; font: 11px/1.6 var(--mono); color: var(--text-2);
+  display: flex; flex-wrap: wrap; gap: 4px 14px;
+}
+.trace-out span b { color: var(--text); font-weight: 500; }
+.trace-cost { text-align: right; padding-top: 3px; white-space: nowrap; }
+.trace-cost .n { font: 500 15px var(--mono); }
+.trace-cost .n.zero { color: var(--free); }
+.trace-cost .l { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; }
+
+/* ------------------------------------------------------------------ misc --- */
+
+.callout {
+  border: 1px solid var(--line); border-left: 2px solid var(--warn);
+  background: var(--panel-2); border-radius: var(--r);
+  padding: 12px 14px; font-size: 12px; color: var(--text-2);
+}
+.callout.bad { border-left-color: var(--bad); }
+.callout.info { border-left-color: var(--live); }
+.callout b { color: var(--text); font-weight: 600; }
+
+.empty { padding: 44px 24px; text-align: center; color: var(--text-2); }
+.empty h3 { margin: 0 0 8px; font-size: 14px; color: var(--text); font-weight: 600; }
+.empty p { margin: 0 auto 16px; max-width: 460px; font-size: 12px; line-height: 1.65; }
+
+pre.cmd {
+  margin: 0; padding: 11px 13px; background: #05070a; border: 1px solid var(--line);
+  border-radius: var(--r); font: 12px/1.7 var(--mono); color: var(--text-2);
+  overflow-x: auto; text-align: left;
+}
+pre.cmd b { color: var(--free); font-weight: 500; }
+
+.btn {
+  border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+  padding: 6px 12px; border-radius: var(--r); cursor: pointer;
+}
+.btn:hover { border-color: #333a44; background: #1c2027; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.primary { background: var(--live); border-color: var(--live); color: #05070a; font-weight: 600; }
+.btn.primary:hover { background: #7cb8ff; }
+.btn.danger:hover { border-color: var(--bad); color: var(--bad); }
+
+.input {
+  background: #05070a; border: 1px solid var(--line); border-radius: var(--r);
+  color: var(--text); padding: 7px 11px; font: 13px var(--sans); width: 100%;
+}
+.input:focus { outline: none; border-color: var(--live); }
+.input.code { font: 500 20px/1 var(--mono); letter-spacing: .18em; text-align: center; padding: 14px; }
+
+.score { font: 500 13px var(--mono); }
+.bar-mini { height: 3px; border-radius: 2px; background: var(--line); margin-top: 5px; width: 52px; }
+.bar-mini i { display: block; height: 100%; border-radius: 2px; background: var(--live); }
+
+.row { display: flex; align-items: center; gap: 10px; }
+.wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+.stack { display: flex; flex-direction: column; gap: 3px; }
+
+.center-page { display: grid; place-items: center; min-height: 100vh; padding: 24px; }
+.card-narrow { width: 100%; max-width: 400px; }
+
+.link-toggle {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  color: var(--text-3); font: 11px var(--mono); text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.link-toggle:hover { color: var(--live); }
+
+.trace-detail { margin-top: 8px; font-size: 11px; }
+.trace-detail > .muted { margin-bottom: 4px; font-family: var(--mono); }
+.trace-detail .pill { font-size: 11px; max-width: 100%; }

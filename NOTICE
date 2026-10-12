@@ -1,0 +1,16 @@
+GTM-OS
+Copyright 2026 Naman Chitkara
+
+This product depends on software developed by Daniel Sticker:
+
+  mcp-server-linkedin (https://github.com/stickerdaniel/linkedin-mcp-server)
+  Licensed under the Apache License, Version 2.0.
+
+The dependency is consumed as an unmodified published package from PyPI. No
+source of that project is redistributed here, and no modifications are made to
+it. GTM-OS communicates with it over the Model Context Protocol as an ordinary
+client.
+
+This project is not affiliated with, authorized by, endorsed by, or sponsored by
+LinkedIn Corporation or Microsoft. "LinkedIn" is a registered trademark of
+LinkedIn Corporation and is used descriptively only.

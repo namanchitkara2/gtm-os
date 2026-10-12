@@ -1,0 +1,34 @@
+[project]
+name = "gtm-os"
+version = "0.1.0"
+description = "Agentic sourcing and outreach platform for recruiters and sales teams"
+requires-python = ">=3.12,<3.15"
+
+# Test tooling lives in a group rather than in project dependencies: the
+# deployed control plane should not ship a test runner.
+[dependency-groups]
+dev = ["pytest>=8.3", "pytest-asyncio>=0.24"]
+
+[tool.uv.workspace]
+members = ["packages/*", "apps/control-plane", "apps/graph-runner", "apps/bridge"]
+
+[tool.uv.sources]
+gtmos-schemas = { workspace = true }
+gtmos-providers = { workspace = true }
+gtmos-graphs = { workspace = true }
+gtmos-scraping = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+# "tests" is load-bearing: without it a bare `pytest` — which is what CI runs —
+# silently skips tests/, where the brief-parser regression and the tenant-isolation
+# suite live. The two highest-value suites in the repo were invisible to the
+# default invocation.
+testpaths = ["tests", "packages", "apps"]
