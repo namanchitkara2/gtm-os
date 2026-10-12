@@ -167,7 +167,3 @@ docker exec -i gtmos-pg psql -U gtmos -d gtmos < db/migrations/0001_init.sql
    makes a database, a cache, and a dedupe key possible.
 3. **A write must never happen twice.** See `docs/BRIDGE.md`.
 
-## Attribution
-
-`apps/bridge` depends on [`mcp-server-linkedin`](https://github.com/stickerdaniel/linkedin-mcp-server)
-(Apache-2.0) by Daniel Sticker, used as a published package — see `NOTICE`.
